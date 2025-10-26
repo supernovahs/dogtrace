@@ -1,14 +1,7 @@
-# DogTrace: Transaction Post-Mortem Reports for Local Development
 
-**DogTrace** is a debugging tool for EVM smart contracts that generates shareable PDF reports from local transaction traces. Designed for Anvil, Hardhat, and other local development nodes.
+<img width="600" height="260" alt="DogTrace" src="https://github.com/user-attachments/assets/15284c6a-1624-42bf-a789-6035b055adb0" />
 
-## Features
-
-- **Single-page PDF reports** - Compact, professional transaction analysis
-- **Automatic error detection** - Identifies panic codes and revert reasons
-- **Source mapping** - Highlights exact line of revert in your Solidity code
-- **Storage change tracking** - Decodes variable names and values (strings, numbers)
-- **Zero configuration** - Just point to your transaction hash and contract source
+ Single-page PDF reports with automatic error detection, source mapping to exact revert lines, storage change decoding, and zero configuration.
 
 ## Installation
 
@@ -39,16 +32,13 @@ A PDF report will open in your browser with:
 - Hardhat Network
 - Ganache
 
-**Not supported:**
-- Public RPC endpoints (Infura, Alchemy, etc.)
-
 ## Important Notes
 
 This is **experimental software** designed for local development workflows. Key considerations:
 
 - **Local nodes only** - Does not work with public RPC endpoints or archive nodes
 - **Source code required** - Best results when providing contract source for accurate revert locations
-- **No production use** - Reports are generated in OS temp directory and not suitable for production debugging
+- **No production use** - Reports are generated in the OS temp directory and are not suitable for production debugging
 
 ## Project Structure
 
