@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# TypeScript compiled output in src directories
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# But keep config files
+!*.config.js
+!eslint.config.mjs
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+*_old.*
+*_v2.*
+*.backup
+
+# Test/debug files
+.pnpm-debug.log
+*.log

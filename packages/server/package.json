@@ -1,0 +1,35 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node dist/index.js",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@ethereumjs/block": "^10.0.0",
+    "@ethereumjs/vm": "^10.0.0",
+    "@types/pdfkit": "^0.17.3",
+    "cors": "^2.8.5",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1",
+    "pdfkit": "^0.17.2",
+    "process": "^0.11.10",
+    "solc": "^0.8.30"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3"
+  }
+}
