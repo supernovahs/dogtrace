@@ -30,7 +30,6 @@ A PDF report will open in your browser with:
 **Supported:**
 - Anvil (Foundry) - Enable with `anvil --steps-tracing`
 - Hardhat Network
-- Ganache
 
 ## Important Notes
 
