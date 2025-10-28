@@ -7,15 +7,15 @@ import type { DebugSession } from './debug_service.js';
 
 // Professional color palette
 const COLORS = {
-  primary: '#2563EB',      // Blue
-  success: '#10B981',      // Green
-  warning: '#F59E0B',      // Amber
-  error: '#EF4444',        // Red
-  critical: '#DC2626',     // Dark Red
-  text: '#1F2937',         // Dark Gray
-  textLight: '#6B7280',    // Medium Gray
-  background: '#F9FAFB',   // Light Gray
-  border: '#E5E7EB',       // Border Gray
+  primary: '#2563EB', // Blue
+  success: '#10B981', // Green
+  warning: '#F59E0B', // Amber
+  error: '#EF4444', // Red
+  critical: '#DC2626', // Dark Red
+  text: '#1F2937', // Dark Gray
+  textLight: '#6B7280', // Medium Gray
+  background: '#F9FAFB', // Light Gray
+  border: '#E5E7EB', // Border Gray
 };
 
 export class PDFGenerator {
@@ -64,7 +64,7 @@ export class PDFGenerator {
         Title: `Transaction Report - ${session.transaction.hash}`,
         Author: 'DogTrace',
         Subject: 'Smart Contract Transaction Analysis',
-      }
+      },
     });
 
     // Single compact page with all critical info
@@ -81,38 +81,43 @@ export class PDFGenerator {
     let y = margin;
 
     // Branding
-    doc.fontSize(11)
-       .fillColor(COLORS.primary)
-       .font('Helvetica-Bold')
-       .text('DOGTRACE', doc.page.width - 110, margin - 5, { align: 'right', width: 70 });
+    doc
+      .fontSize(11)
+      .fillColor(COLORS.primary)
+      .font('Helvetica-Bold')
+      .text('DOGTRACE', doc.page.width - 110, margin - 5, {
+        align: 'right',
+        width: 70,
+      });
 
     // Header
-    doc.fontSize(18)
-       .fillColor(COLORS.primary)
-       .font('Helvetica-Bold')
-       .text('Transaction Debug Report', margin, y, { continued: true });
+    doc
+      .fontSize(18)
+      .fillColor(COLORS.primary)
+      .font('Helvetica-Bold')
+      .text('Transaction Debug Report', margin, y, { continued: true });
 
     // Status badge
     const statusColor = session.result.success ? COLORS.success : COLORS.error;
     const statusText = session.result.success ? 'SUCCESS' : 'FAILED';
 
-    doc.fontSize(12)
-       .fillColor(statusColor)
-       .text(` • ${statusText}`);
+    doc.fontSize(12).fillColor(statusColor).text(` • ${statusText}`);
 
     y += 35;
 
     // Transaction hash (full, selectable)
-    doc.fontSize(8)
-       .fillColor(COLORS.textLight)
-       .font('Helvetica')
-       .text('Transaction Hash:', margin, y);
+    doc
+      .fontSize(8)
+      .fillColor(COLORS.textLight)
+      .font('Helvetica')
+      .text('Transaction Hash:', margin, y);
 
     y += 12;
-    doc.fontSize(9)
-       .fillColor(COLORS.text)
-       .font('Courier')
-       .text(session.transaction.hash, margin, y);
+    doc
+      .fontSize(9)
+      .fillColor(COLORS.text)
+      .font('Courier')
+      .text(session.transaction.hash, margin, y);
 
     y += 25;
 
@@ -121,21 +126,26 @@ export class PDFGenerator {
       ['From', session.transaction.from],
       ['To', session.transaction.to || 'Contract Creation'],
       ['Block', session.transaction.blockNumber.toString()],
-      ['Gas Used', `${session.result.gasUsed} / ${session.transaction.gasLimit} (${((session.result.gasUsed / session.transaction.gasLimit) * 100).toFixed(1)}%)`],
+      [
+        'Gas Used',
+        `${session.result.gasUsed} / ${session.transaction.gasLimit} (${((session.result.gasUsed / session.transaction.gasLimit) * 100).toFixed(1)}%)`,
+      ],
     ];
 
     metrics.forEach(([label, value]) => {
       // Label
-      doc.fontSize(8)
-         .fillColor(COLORS.textLight)
-         .font('Helvetica')
-         .text(label + ':', margin, y);
+      doc
+        .fontSize(8)
+        .fillColor(COLORS.textLight)
+        .font('Helvetica')
+        .text(label + ':', margin, y);
 
       // Value on same line
-      doc.fontSize(8)
-         .fillColor(COLORS.text)
-         .font('Courier')
-         .text(value || 'N/A', margin + 70, y);
+      doc
+        .fontSize(8)
+        .fillColor(COLORS.text)
+        .font('Courier')
+        .text(value || 'N/A', margin + 70, y);
 
       y += 14;
     });
@@ -147,12 +157,13 @@ export class PDFGenerator {
       // Error message
       y += 10;
 
-      doc.fontSize(10)
-         .fillColor(COLORS.critical)
-         .font('Helvetica-Bold')
-         .text(session.result.error || 'Transaction reverted', margin + 10, y, {
-           width: doc.page.width - 2 * margin - 20,
-         });
+      doc
+        .fontSize(10)
+        .fillColor(COLORS.critical)
+        .font('Helvetica-Bold')
+        .text(session.result.error || 'Transaction reverted', margin + 10, y, {
+          width: doc.page.width - 2 * margin - 20,
+        });
 
       y += 20;
 
@@ -163,16 +174,16 @@ export class PDFGenerator {
         const loc = session.result.revertLocation;
 
         // Function header
-        doc.fontSize(9)
-           .fillColor(COLORS.text)
-           .font('Helvetica-Bold')
-           .text(`Function: ${funcCtx.functionName}()`, margin, y);
+        doc
+          .fontSize(9)
+          .fillColor(COLORS.text)
+          .font('Helvetica-Bold')
+          .text(`Function: ${funcCtx.functionName}()`, margin, y);
 
         y += 20;
 
         // Code block with highlight
-        doc.fontSize(8)
-           .font('Courier');
+        doc.fontSize(8).font('Courier');
 
         const lines = funcCtx.code.split('\n');
         lines.forEach((line, index) => {
@@ -182,21 +193,22 @@ export class PDFGenerator {
           // Highlight revert line
           if (isRevertLine) {
             const highlightWidth = doc.page.width - 2 * margin;
-            doc.rect(margin, y - 2, highlightWidth, 14)
-               .fill('#FEE2E2');
+            doc.rect(margin, y - 2, highlightWidth, 14).fill('#FEE2E2');
           }
 
           // Line number
-          doc.fillColor(COLORS.textLight)
-             .font('Courier')
-             .fontSize(8)
-             .text(lineNum.toString().padStart(4), margin, y);
+          doc
+            .fillColor(COLORS.textLight)
+            .font('Courier')
+            .fontSize(8)
+            .text(lineNum.toString().padStart(4), margin, y);
 
           // Code
-          doc.fillColor(isRevertLine ? COLORS.critical : COLORS.text)
-             .font(isRevertLine ? 'Courier-Bold' : 'Courier')
-             .fontSize(8)
-             .text(line, margin + 35, y);
+          doc
+            .fillColor(isRevertLine ? COLORS.critical : COLORS.text)
+            .font(isRevertLine ? 'Courier-Bold' : 'Courier')
+            .fontSize(8)
+            .text(line, margin + 35, y);
 
           y += 12;
 
@@ -212,13 +224,17 @@ export class PDFGenerator {
     }
 
     // Storage changes (compact)
-    if (session.analysis?.storageChanges && session.analysis.storageChanges.length > 0) {
+    if (
+      session.analysis?.storageChanges &&
+      session.analysis.storageChanges.length > 0
+    ) {
       y += 20;
 
-      doc.fontSize(11)
-         .fillColor(COLORS.primary)
-         .font('Helvetica-Bold')
-         .text('Storage Changes', margin, y);
+      doc
+        .fontSize(11)
+        .fillColor(COLORS.primary)
+        .font('Helvetica-Bold')
+        .text('Storage Changes', margin, y);
 
       y += 18;
 
@@ -229,10 +245,11 @@ export class PDFGenerator {
         const varName = varInfo ? varInfo.name : `Slot ${change.slotNumber}`;
 
         // Variable name
-        doc.fontSize(10)
-           .fillColor(COLORS.text)
-           .font('Helvetica')
-           .text(`${varName}:`, margin + 5, y);
+        doc
+          .fontSize(10)
+          .fillColor(COLORS.text)
+          .font('Helvetica')
+          .text(`${varName}:`, margin + 5, y);
 
         // Attempt string decoding
         const oldDecoded = this.tryDecodeString(change.oldValue);
@@ -242,8 +259,16 @@ export class PDFGenerator {
         let newValueText: string;
 
         if (oldDecoded.isString || newDecoded.isString) {
-          oldValueText = oldDecoded.isString ? oldDecoded.value : (change.oldValueDecimal === '0' ? '""' : oldDecoded.value);
-          newValueText = newDecoded.isString ? newDecoded.value : (change.newValueDecimal === '0' ? '""' : newDecoded.value);
+          oldValueText = oldDecoded.isString
+            ? oldDecoded.value
+            : change.oldValueDecimal === '0'
+              ? '""'
+              : oldDecoded.value;
+          newValueText = newDecoded.isString
+            ? newDecoded.value
+            : change.newValueDecimal === '0'
+              ? '""'
+              : newDecoded.value;
         } else {
           oldValueText = change.oldValueDecimal;
           newValueText = change.newValueDecimal;
@@ -251,41 +276,50 @@ export class PDFGenerator {
 
         const arrow = ' -> ';
 
-        doc.fontSize(10)
-           .fillColor(COLORS.textLight)
-           .font('Courier')
-           .text(oldValueText + arrow, margin + 80, y, { continued: true });
+        doc
+          .fontSize(10)
+          .fillColor(COLORS.textLight)
+          .font('Courier')
+          .text(oldValueText + arrow, margin + 80, y, { continued: true });
 
-        doc.fillColor(COLORS.success)
-           .text(newValueText);
+        doc.fillColor(COLORS.success).text(newValueText);
 
         y += 14;
 
         if (y > doc.page.height - 60) {
-          doc.fontSize(7)
-             .fillColor(COLORS.textLight)
-             .text(`... and ${session.analysis!.storageChanges.length - changes.length} more`, margin + 5, y);
+          doc
+            .fontSize(7)
+            .fillColor(COLORS.textLight)
+            .text(
+              `... and ${session.analysis!.storageChanges.length - changes.length} more`,
+              margin + 5,
+              y
+            );
           return;
         }
       });
     }
 
     // Footer
-    doc.fontSize(7)
-       .fillColor(COLORS.textLight)
-       .text(
-         `Generated by DogTrace • ${new Date().toLocaleString()}`,
-         margin,
-         doc.page.height - 50,
-         { align: 'center', width: doc.page.width - 2 * margin }
-       );
+    doc
+      .fontSize(7)
+      .fillColor(COLORS.textLight)
+      .text(
+        `Generated by DogTrace • ${new Date().toLocaleString()}`,
+        margin,
+        doc.page.height - 50,
+        { align: 'center', width: doc.page.width - 2 * margin }
+      );
   }
 
   /**
    * Decode Solidity short string from storage value
    * Strings < 32 bytes are stored inline with length*2 in last byte
    */
-  private tryDecodeString(hexValue: string): { isString: boolean; value: string } {
+  private tryDecodeString(hexValue: string): {
+    isString: boolean;
+    value: string;
+  } {
     try {
       const hex = hexValue.startsWith('0x') ? hexValue.slice(2) : hexValue;
       const paddedHex = hex.padStart(64, '0');
@@ -313,5 +347,4 @@ export class PDFGenerator {
       return { isString: false, value: BigInt(hexValue).toString() };
     }
   }
-
 }

@@ -34,7 +34,10 @@ export class StorageLayoutParser {
    * @param contractPath - Path to the Solidity source file
    * @param deployedBytecode - Optional deployed bytecode to use for PC mapping (without 0x prefix)
    */
-  async parseContract(contractPath: string, deployedBytecode?: string): Promise<Map<number, StorageVariable>> {
+  async parseContract(
+    contractPath: string,
+    deployedBytecode?: string
+  ): Promise<Map<number, StorageVariable>> {
     const storageMap = new Map<number, StorageVariable>();
 
     try {
@@ -63,7 +66,11 @@ export class StorageLayoutParser {
         settings: {
           outputSelection: {
             '*': {
-              '*': ['storageLayout', 'evm.deployedBytecode.sourceMap', 'evm.deployedBytecode.object'],
+              '*': [
+                'storageLayout',
+                'evm.deployedBytecode.sourceMap',
+                'evm.deployedBytecode.object',
+              ],
             },
           },
         },
@@ -119,28 +126,41 @@ export class StorageLayoutParser {
           // Use deployed bytecode if provided, otherwise use compiled bytecode
           if (deployedBytecode) {
             // Strip 0x prefix if present
-            this.bytecode = deployedBytecode.startsWith('0x') ? deployedBytecode.slice(2) : deployedBytecode;
+            this.bytecode = deployedBytecode.startsWith('0x')
+              ? deployedBytecode.slice(2)
+              : deployedBytecode;
 
             // Compare with compiled bytecode (ignore metadata hash at the end)
             // Metadata is appended as: 0xa2 0x64 'i' 'p' 'f' 's' 0x58 0x22 <34 bytes> 0x64 's' 'o' 'l' 'c' 0x43 <3 bytes>
             // We'll compare the first significant portion
-            const minLength = Math.min(compiledBytecode.length, this.bytecode.length);
+            const minLength = Math.min(
+              compiledBytecode.length,
+              this.bytecode.length
+            );
             const compareLength = Math.min(500, minLength); // Compare first 250 bytes
 
             const compiledPrefix = compiledBytecode.slice(0, compareLength);
             const deployedPrefix = this.bytecode.slice(0, compareLength);
 
             if (compiledPrefix !== deployedPrefix) {
-              console.warn('\n⚠️  WARNING: Deployed bytecode does not match compiled bytecode!');
+              console.warn(
+                '\n⚠️  WARNING: Deployed bytecode does not match compiled bytecode!'
+              );
               console.warn('This may happen if:');
               console.warn('  - Different compiler version was used');
               console.warn('  - Different optimizer settings');
               console.warn('  - Source code does not match deployed contract');
-              console.warn(`Compiled bytecode (first 100 chars): ${compiledBytecode.slice(0, 100)}...`);
-              console.warn(`Deployed bytecode (first 100 chars): ${this.bytecode.slice(0, 100)}...`);
+              console.warn(
+                `Compiled bytecode (first 100 chars): ${compiledBytecode.slice(0, 100)}...`
+              );
+              console.warn(
+                `Deployed bytecode (first 100 chars): ${this.bytecode.slice(0, 100)}...`
+              );
               console.warn('Source mapping may be inaccurate!\n');
             } else {
-              console.log('✓ Deployed bytecode matches compiled bytecode (first 250 bytes)');
+              console.log(
+                '✓ Deployed bytecode matches compiled bytecode (first 250 bytes)'
+              );
             }
           } else {
             this.bytecode = compiledBytecode;
@@ -148,8 +168,12 @@ export class StorageLayoutParser {
           }
 
           // Build PC to instruction index map
-          this.pcToInstructionIndex = this.buildPCToInstructionMap(this.bytecode);
-          console.log(`Built PC map with ${this.pcToInstructionIndex.size} entries from ${deployedBytecode ? 'deployed' : 'compiled'} bytecode`);
+          this.pcToInstructionIndex = this.buildPCToInstructionMap(
+            this.bytecode
+          );
+          console.log(
+            `Built PC map with ${this.pcToInstructionIndex.size} entries from ${deployedBytecode ? 'deployed' : 'compiled'} bytecode`
+          );
         }
       }
 
@@ -163,7 +187,10 @@ export class StorageLayoutParser {
         });
       });
 
-      console.log(`Loaded storage layout for ${contractName}:`, Array.from(storageMap.entries()));
+      console.log(
+        `Loaded storage layout for ${contractName}:`,
+        Array.from(storageMap.entries())
+      );
 
       return storageMap;
     } catch (error) {
@@ -216,8 +243,14 @@ export class StorageLayoutParser {
    * j = jump type (i=into, o=out of, -=regular)
    * Empty fields use previous value (compression)
    */
-  private buildSourceMapCache(): Map<number, { start: number; length: number; fileIndex: number }> {
-    const cache = new Map<number, { start: number; length: number; fileIndex: number }>();
+  private buildSourceMapCache(): Map<
+    number,
+    { start: number; length: number; fileIndex: number }
+  > {
+    const cache = new Map<
+      number,
+      { start: number; length: number; fileIndex: number }
+    >();
 
     if (!this.sourceMap) return cache;
 
@@ -232,7 +265,11 @@ export class StorageLayoutParser {
       entries.forEach((entry, pc) => {
         if (!entry) {
           // Empty entry - use all previous values
-          cache.set(pc, { start: lastStart, length: lastLength, fileIndex: lastFileIndex });
+          cache.set(pc, {
+            start: lastStart,
+            length: lastLength,
+            fileIndex: lastFileIndex,
+          });
           return;
         }
 
@@ -252,7 +289,11 @@ export class StorageLayoutParser {
           lastJump = parts[3];
         }
 
-        cache.set(pc, { start: lastStart, length: lastLength, fileIndex: lastFileIndex });
+        cache.set(pc, {
+          start: lastStart,
+          length: lastLength,
+          fileIndex: lastFileIndex,
+        });
       });
 
       return cache;
@@ -265,7 +306,9 @@ export class StorageLayoutParser {
   /**
    * Get source location from PC value using proper source map parsing
    */
-  getSourceLocation(pc: number): { line: number; column: number; snippet: string } | null {
+  getSourceLocation(
+    pc: number
+  ): { line: number; column: number; snippet: string } | null {
     if (!this.sourceMap || !this.sourceCode) {
       return null;
     }
@@ -283,13 +326,17 @@ export class StorageLayoutParser {
 
       // Build source map cache (maps instruction index -> source position)
       const sourceMapCache = this.buildSourceMapCache();
-      console.log(`Source map has ${sourceMapCache.size} entries, looking for instruction ${instructionIndex}`);
+      console.log(
+        `Source map has ${sourceMapCache.size} entries, looking for instruction ${instructionIndex}`
+      );
 
       // Debug: show some entries around the target
       for (let i = instructionIndex - 5; i <= instructionIndex + 5; i++) {
         const entry = sourceMapCache.get(i);
         if (entry) {
-          console.log(`  Instruction ${i}: start=${entry.start}, length=${entry.length}, fileIndex=${entry.fileIndex}`);
+          console.log(
+            `  Instruction ${i}: start=${entry.start}, length=${entry.length}, fileIndex=${entry.fileIndex}`
+          );
         }
       }
 
@@ -299,9 +346,15 @@ export class StorageLayoutParser {
 
       // Handle compiler-generated code (file index != 0)
       if (position && position.fileIndex !== 0) {
-        console.warn(`⚠️  Revert is in file index ${position.fileIndex} (compiler-generated code)`);
-        console.warn(`This is usually internal runtime checks (overflow, division by zero, etc.)`);
-        console.warn(`Searching backwards for the source line that triggered it...`);
+        console.warn(
+          `⚠️  Revert is in file index ${position.fileIndex} (compiler-generated code)`
+        );
+        console.warn(
+          `This is usually internal runtime checks (overflow, division by zero, etc.)`
+        );
+        console.warn(
+          `Searching backwards for the source line that triggered it...`
+        );
 
         // Search backwards up to 20 instructions for source file code
         const searchLimit = 20;
@@ -311,7 +364,10 @@ export class StorageLayoutParser {
 
           const prevPosition = sourceMapCache.get(prevIndex);
           if (prevPosition && prevPosition.fileIndex === 0) {
-            console.log(`Found triggering instruction ${prevIndex} (offset -${offset}) in source file:`, prevPosition);
+            console.log(
+              `Found triggering instruction ${prevIndex} (offset -${offset}) in source file:`,
+              prevPosition
+            );
             const start = prevPosition.start;
             const lines = this.sourceCode.split('\n');
             let currentOffset = 0;
@@ -341,18 +397,24 @@ export class StorageLayoutParser {
           }
         }
 
-        console.warn(`Could not find source line within ${searchLimit} instructions - all are in compiler-generated code`);
+        console.warn(
+          `Could not find source line within ${searchLimit} instructions - all are in compiler-generated code`
+        );
         return null;
       }
 
       if (!position) {
-        console.warn(`No source map entry for instruction ${instructionIndex} (map size: ${sourceMapCache.size})`);
+        console.warn(
+          `No source map entry for instruction ${instructionIndex} (map size: ${sourceMapCache.size})`
+        );
 
         // Try nearby instructions (source maps can be off by a few)
         for (let offset = -5; offset <= 5; offset++) {
           const nearbyPos = sourceMapCache.get(instructionIndex + offset);
           if (nearbyPos) {
-            console.log(`Found nearby instruction ${instructionIndex + offset} instead`);
+            console.log(
+              `Found nearby instruction ${instructionIndex + offset} instead`
+            );
             // Use nearby position
             const start = nearbyPos.start;
             const lines = this.sourceCode.split('\n');
@@ -422,10 +484,20 @@ export class StorageLayoutParser {
    * Find all potential revert locations in source code
    * Looks for: require(), revert(), assert(), and division operations
    */
-  findAllPotentialReverts(): Array<{ line: number; snippet: string; functionName: string; type: string }> {
+  findAllPotentialReverts(): Array<{
+    line: number;
+    snippet: string;
+    functionName: string;
+    type: string;
+  }> {
     if (!this.sourceCode) return [];
 
-    const results: Array<{ line: number; snippet: string; functionName: string; type: string }> = [];
+    const results: Array<{
+      line: number;
+      snippet: string;
+      functionName: string;
+      type: string;
+    }> = [];
     const lines = this.sourceCode.split('\n');
     let currentFunction = 'unknown';
 
@@ -498,10 +570,18 @@ export class StorageLayoutParser {
   /**
    * Find all require statements in the source code (for backwards compatibility)
    */
-  findAllRequires(): Array<{ line: number; snippet: string; functionName: string }> {
+  findAllRequires(): Array<{
+    line: number;
+    snippet: string;
+    functionName: string;
+  }> {
     return this.findAllPotentialReverts()
-      .filter(r => r.type === 'require')
-      .map(({ line, snippet, functionName }) => ({ line, snippet, functionName }));
+      .filter((r) => r.type === 'require')
+      .map(({ line, snippet, functionName }) => ({
+        line,
+        snippet,
+        functionName,
+      }));
   }
 
   /**
@@ -613,7 +693,9 @@ export class StorageLayoutParser {
             const stringHex = hex.slice(0, length * 2);
             let str = '';
             for (let i = 0; i < stringHex.length; i += 2) {
-              str += String.fromCharCode(parseInt(stringHex.slice(i, i + 2), 16));
+              str += String.fromCharCode(
+                parseInt(stringHex.slice(i, i + 2), 16)
+              );
             }
             return `"${str}"`;
           }

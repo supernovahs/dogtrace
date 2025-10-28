@@ -1,20 +1,50 @@
 {
-  "name": "cli",
-  "version": "1.0.0",
-  "description": "",
+  "name": "dogtrace",
+  "version": "0.1.0",
+  "description": "Visual debugger for Solidity smart contracts on local development nodes",
   "bin": {
     "dog": "./dist/index.js",
     "dogtrace": "./dist/index.js"
   },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "main": "./dist/index.js",
   "type": "module",
+  "scripts": {
+    "build": "npm run build:server && tsc && npm run bundle-server",
+    "build:server": "cd ../server && npm run build",
+    "bundle-server": "mkdir -p dist/server && cp -r ../server/dist dist/server/ && cp -r ../server/node_modules dist/server/",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "debugger",
+    "evm",
+    "smart-contracts",
+    "anvil",
+    "hardhat",
+    "foundry",
+    "blockchain",
+    "web3",
+    "transaction-debugger"
+  ],
+  "author": "supernovahs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supernovahs/dogtrace.git"
+  },
+  "homepage": "https://github.com/supernovahs/dogtrace#readme",
+  "bugs": {
+    "url": "https://github.com/supernovahs/dogtrace/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "devDependencies": {
     "@types/node": "^24.8.1",
     "typescript": "^5.9.3"
