@@ -1,10 +1,10 @@
 
 <img width="600" height="260" alt="DogTrace" src="https://github.com/user-attachments/assets/15284c6a-1624-42bf-a789-6035b055adb0" />
-[![npm 
-  version](https://badge.fury.io/js/dogtrace.svg)](https://badge.fury.io/js/dogtrace)
-   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opens
-  ource.org/licenses/MIT)
- Single-page PDF reports with automatic error detection, source mapping to exact revert lines, storage change decoding, and zero configuration.
+
+[![npm version](https://badge.fury.io/js/dogtrace.svg)](https://badge.fury.io/js/dogtrace)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Single-page PDF reports with automatic error detection, source mapping to exact revert lines, storage change decoding, and zero configuration.
 
 ## Installation
 
