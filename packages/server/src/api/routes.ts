@@ -3,7 +3,10 @@ import { Router } from 'express';
 import morgan from 'morgan';
 
 import { validateTxHash } from './validators/request_validator.js';
-import { debugTransaction, debugTransactionPDF } from './controllers/debug_controller.js';
+import {
+  debugTransaction,
+  debugTransactionPDF,
+} from './controllers/debug_controller.js';
 
 export function setupRoutes(app: Express): void {
   const apiRouter = Router();

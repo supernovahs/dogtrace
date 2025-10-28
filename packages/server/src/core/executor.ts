@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 export interface ExecutionTrace {
   step: number;
@@ -90,18 +90,24 @@ export class TransactionExecutor {
       }
 
       console.log(`📦 Block: ${block.number}`);
-      console.log(`⛽ Gas Used: ${receipt.gasUsed.toString()} / ${tx.gasLimit.toString()}`);
+      console.log(
+        `⛽ Gas Used: ${receipt.gasUsed.toString()} / ${tx.gasLimit.toString()}`
+      );
       console.log(`✅ Status: ${receipt.status === 1 ? 'Success' : 'Failed'}`);
 
       // 4. Get execution trace via debug_traceTransaction
       console.log(`\n🔎 Fetching execution trace...`);
 
       // Try default tracer first (works better with Anvil)
-      let traceResult = await this.provider.send('debug_traceTransaction', [txHash]);
+      let traceResult = await this.provider.send('debug_traceTransaction', [
+        txHash,
+      ]);
 
       // If that didn't work, try with explicit options
       if (!traceResult.structLogs || traceResult.structLogs.length === 0) {
-        console.log(`⚠️  Default tracer returned empty logs, trying with options...`);
+        console.log(
+          `⚠️  Default tracer returned empty logs, trying with options...`
+        );
         traceResult = await this.provider.send('debug_traceTransaction', [
           txHash,
           {
@@ -109,15 +115,20 @@ export class TransactionExecutor {
             enableReturnData: true,
             disableStorage: false,
             disableStack: false,
-          }
+          },
         ]);
       }
 
-      console.log(`✅ Trace received: ${traceResult.structLogs?.length || 0} steps`);
+      console.log(
+        `✅ Trace received: ${traceResult.structLogs?.length || 0} steps`
+      );
 
       // Debug: log the actual trace result structure
       if (!traceResult.structLogs || traceResult.structLogs.length === 0) {
-        console.log(`⚠️  Empty trace! Full result:`, JSON.stringify(traceResult, null, 2).slice(0, 500));
+        console.log(
+          `⚠️  Empty trace! Full result:`,
+          JSON.stringify(traceResult, null, 2).slice(0, 500)
+        );
       }
 
       // 5. Parse trace into our format
@@ -129,9 +140,8 @@ export class TransactionExecutor {
       console.log(`💾 Storage changes: ${storageChanges.length}`);
 
       // 7. Extract function selector
-      const functionSelector = tx.data.length >= 10
-        ? tx.data.slice(0, 10)
-        : undefined;
+      const functionSelector =
+        tx.data.length >= 10 ? tx.data.slice(0, 10) : undefined;
 
       // Decode panic/revert reason from returnValue
       let errorMessage = traceResult.revertReason || 'Transaction reverted';
@@ -156,7 +166,10 @@ export class TransactionExecutor {
         // Check if it's a Error(string): 0x08c379a0
         else if (returnData.startsWith('08c379a0')) {
           try {
-            const decoded = ethers.AbiCoder.defaultAbiCoder().decode(['string'], '0x' + returnData.slice(8));
+            const decoded = ethers.AbiCoder.defaultAbiCoder().decode(
+              ['string'],
+              '0x' + returnData.slice(8)
+            );
             errorMessage = `Error: ${decoded[0]}`;
           } catch (e) {}
         }
@@ -170,10 +183,10 @@ export class TransactionExecutor {
           success: receipt.status === 1,
           gasUsed: receipt.gasUsed,
           ...(traceResult.returnValue && {
-            returnData: '0x' + traceResult.returnValue
+            returnData: '0x' + traceResult.returnValue,
           }),
           ...(receipt.status === 0 && {
-            error: errorMessage
+            error: errorMessage,
           }),
         },
         analysis: {
@@ -181,15 +194,14 @@ export class TransactionExecutor {
           storageChanges,
         },
       };
-
     } catch (error) {
       if (error instanceof Error) {
         // Check if it's a "method not found" error
         if (error.message.includes('debug_traceTransaction')) {
           throw new Error(
             'debug_traceTransaction not available. ' +
-            'Make sure you are connected to a LOCAL node (Anvil/Hardhat), ' +
-            'not a public RPC endpoint.'
+              'Make sure you are connected to a LOCAL node (Anvil/Hardhat), ' +
+              'not a public RPC endpoint.'
           );
         }
         throw error;
@@ -266,8 +278,8 @@ export class TransactionExecutor {
 
     // Extract SSTORE operations with old/new values
     const storageChanges = traces
-      .filter(t => t.storage)
-      .map(t => {
+      .filter((t) => t.storage)
+      .map((t) => {
         const slot = t.storage!.key;
         const newValue = t.storage!.value;
         const oldValue = storageReads.get(slot) || '0x' + '0'.repeat(64);

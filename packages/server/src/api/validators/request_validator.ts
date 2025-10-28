@@ -7,7 +7,7 @@ export function validateTxHash(
 ): void {
   const { txHash } = req.params;
   if (txHash == undefined) {
-    throw new Error('txHash not available')
+    throw new Error('txHash not available');
   }
   const isValid = /^0x[a-fA-F0-9]{64}$/.test(txHash);
 

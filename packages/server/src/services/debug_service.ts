@@ -1,8 +1,7 @@
-import { TransactionExecutor } from "../core/executor.js";
-import { StorageLayoutParser } from "./storage_layout.js";
-import type { FunctionContext } from "./storage_layout.js";
+import { TransactionExecutor } from '../core/executor.js';
+import { StorageLayoutParser } from './storage_layout.js';
+import type { FunctionContext } from './storage_layout.js';
 import { randomUUID } from 'crypto';
-
 
 export interface DebugOptions {
   rpcUrl?: string;
@@ -34,11 +33,14 @@ export interface DebugSession {
   } | null;
 
   // Storage layout (optional - from source code)
-  storageLayout?: Record<number, {
-    name: string;
-    type: string;
-    slot: number;
-  }>;
+  storageLayout?: Record<
+    number,
+    {
+      name: string;
+      type: string;
+      slot: number;
+    }
+  >;
 
   // Execution traces
   traces: ExecutionTrace[];
@@ -97,29 +99,28 @@ export interface ExecutionTrace {
 }
 
 export class DebugService {
+  private executors: Map<string, TransactionExecutor> = new Map();
 
-      private executors: Map<string, TransactionExecutor> = new Map();
+  constructor(private defaultRpcUrl: string) {}
 
-  constructor(
-    private defaultRpcUrl: string
-  ) {
-  }
-
-  async debug(txHash: string, options: DebugOptions = {}): Promise<DebugSession> {
+  async debug(
+    txHash: string,
+    options: DebugOptions = {}
+  ): Promise<DebugSession> {
     try {
       // 1. Get executor
       const rpcUrl = options.rpcUrl || this.defaultRpcUrl;
       const executor = this.getExecutor(rpcUrl);
-      
+
       // 2. Execute transaction with tracing
-    //   logger.info(`Executing transaction ${txHash}...`);
+      //   logger.info(`Executing transaction ${txHash}...`);
       const executionResult = await executor.executeWithTrace(txHash);
-      
-    //   logger.info(`Execution complete: ${executionResult.traces.length} steps`, {
-    //     gasUsed: executionResult.result.gasUsed.toString(),
-    //     success: executionResult.result.success,
-    //   });
-      
+
+      //   logger.info(`Execution complete: ${executionResult.traces.length} steps`, {
+      //     gasUsed: executionResult.result.gasUsed.toString(),
+      //     success: executionResult.result.success,
+      //   });
+
       // 3. Try to load storage layout from source code (optional)
       let storageLayout: Record<number, any> | undefined = undefined;
       let parser: StorageLayoutParser | undefined = undefined;
@@ -132,13 +133,23 @@ export class DebugService {
           if (executionResult.tx.to) {
             const provider = executor.getProvider();
             const blockNumber = executionResult.tx.blockNumber! - 1;
-            deployedBytecode = await provider.getCode(executionResult.tx.to, blockNumber);
-            console.log(`Fetched deployed bytecode: ${deployedBytecode.slice(0, 100)}... (length: ${deployedBytecode.length})`);
+            deployedBytecode = await provider.getCode(
+              executionResult.tx.to,
+              blockNumber
+            );
+            console.log(
+              `Fetched deployed bytecode: ${deployedBytecode.slice(0, 100)}... (length: ${deployedBytecode.length})`
+            );
           }
 
           parser = new StorageLayoutParser();
-          const layoutMap = await parser.parseContract(options.contractPath, deployedBytecode);
-          console.log(`✅ Loaded storage layout with ${layoutMap.size} variables`);
+          const layoutMap = await parser.parseContract(
+            options.contractPath,
+            deployedBytecode
+          );
+          console.log(
+            `✅ Loaded storage layout with ${layoutMap.size} variables`
+          );
 
           // Convert Map to plain object for JSON serialization
           if (layoutMap.size > 0) {
@@ -153,7 +164,9 @@ export class DebugService {
       } else {
         console.log(`ℹ️  No contract source provided - features disabled:`);
         console.log(`   - Variable names in storage changes`);
-        console.log(`   - Precise revert location (will use heuristic fallback)`);
+        console.log(
+          `   - Precise revert location (will use heuristic fallback)`
+        );
       }
 
       // 4. Find revert location if transaction failed
@@ -161,15 +174,17 @@ export class DebugService {
       let revertLocation = undefined;
       if (!executionResult.result.success && parser) {
         // Find the REVERT or INVALID opcode in the trace
-        const revertIndex = executionResult.traces.findIndex(t =>
-          t.opcode === 'REVERT' || t.opcode === 'INVALID'
+        const revertIndex = executionResult.traces.findIndex(
+          (t) => t.opcode === 'REVERT' || t.opcode === 'INVALID'
         );
 
         if (revertIndex !== -1) {
           const revertTrace = executionResult.traces[revertIndex];
 
           if (revertTrace) {
-            console.log(`\nRevert detected at step ${revertIndex}, PC ${revertTrace.pc}`);
+            console.log(
+              `\nRevert detected at step ${revertIndex}, PC ${revertTrace.pc}`
+            );
 
             // Show the last 30 opcodes before the revert to understand what caused it
             console.log('\nOpcodes leading to revert (last 30):');
@@ -185,7 +200,9 @@ export class DebugService {
             let triggerPC = revertTrace.pc;
 
             // Search backwards through the entire trace to find the last instruction in file index 0
-            console.log('\nSearching for last instruction in user source code (file index 0)...');
+            console.log(
+              '\nSearching for last instruction in user source code (file index 0)...'
+            );
             for (let i = revertIndex - 1; i >= 0; i--) {
               const trace = executionResult.traces[i];
               if (!trace) continue;
@@ -194,8 +211,12 @@ export class DebugService {
               const tempLoc = parser.getSourceLocation(trace.pc);
               if (tempLoc && tempLoc.line > 0) {
                 // Found a valid source location in file index 0
-                console.log(`Found last source instruction at step ${i}, PC ${trace.pc}: ${trace.opcode}`);
-                console.log(`  Maps to line ${tempLoc.line}: ${tempLoc.snippet}`);
+                console.log(
+                  `Found last source instruction at step ${i}, PC ${trace.pc}: ${trace.opcode}`
+                );
+                console.log(
+                  `  Maps to line ${tempLoc.line}: ${tempLoc.snippet}`
+                );
                 triggerPC = trace.pc;
                 break;
               }
@@ -225,7 +246,9 @@ export class DebugService {
               }
             } else {
               // Fallback: source map failed, try finding require statements
-              console.warn('Source map parsing failed, falling back to require detection');
+              console.warn(
+                'Source map parsing failed, falling back to require detection'
+              );
               const requires = parser.findAllRequires();
               if (requires.length > 0 && requires[0]) {
                 const req = requires[0];
@@ -247,7 +270,7 @@ export class DebugService {
       // TODO: Implement source mapping when local source loading is added
       const mappedTraces = executionResult.traces;
       let source = null;
-      
+
       // 5. Build debug session
       const session: DebugSession = {
         id: randomUUID(),
@@ -285,7 +308,6 @@ export class DebugService {
       };
 
       return session;
-      
     } catch (error) {
       console.error(`Failed to debug ${txHash}:`, error);
       if (error instanceof Error) {
@@ -295,14 +317,14 @@ export class DebugService {
     }
   }
 
-    /**
+  /**
    * Get or create executor for RPC URL
    */
   private getExecutor(rpcUrl: string): TransactionExecutor {
     if (!this.executors.has(rpcUrl)) {
       this.executors.set(rpcUrl, new TransactionExecutor(rpcUrl));
     }
-    
+
     return this.executors.get(rpcUrl)!;
   }
 }
